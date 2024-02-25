@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>나의 메모</title>
+    <style>
+        /* 여기에 CSS 스타일을 추가할 수 있습니다 */
+        body { font-family: Arial, sans-serif; }
+        .memo { margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; }
+        .memo-title { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>나의 메모</h1>
+    <p><a href="/memos/create">새 메모 추가</a></p>
+    {% for memo in memos %}
+    <div class="memo">
+        <h2 class="memo-title">{{ memo.title }}</h2>
+        <p>{{ memo.content }}</p>
+        <a href="/memos/update/{{ memo.id }}">수정</a> | 
+        <a href="/memos/delete/{{ memo.id }}">삭제</a>
+    </div>
+    {% endfor %}
+</body>
+</html>
