@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>마이 메모 앱 홈페이지</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container {
+            width: 300px;
+            margin: auto;
+            border: 1px solid #ddd;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .form-group label, .form-group input {
+            display: block;
+            width: 100%;
+        }
+        .form-group input {
+            padding: 5px;
+            margin-top: 5px;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>마이 메모 앱에 오신 것을 환영합니다!</h1>
+        <p>간단한 메모를 작성하고 관리할 수 있는 앱입니다.</p>
+
+        <!-- 로그인 폼 -->
+        <form id="loginForm" action="/login" method="post">
+            <div class="form-group">
+                <label for="username">사용자 이름:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">비밀번호:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="buttons">
+                <input type="submit" value="로그인">
+                <button type="button" onclick="showSignupForm()">회원가입</button>
+            </div>
+        </form>
+
+        <!-- 회원가입 폼 (초기에는 숨겨져 있음) -->
+        <form id="signupForm" style="display:none;" action="/signup" method="post">
+            <div class="form-group">
+                <label for="signupUsername">사용자 이름:</label>
+                <input type="text" id="signupUsername" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="signupEmail">이메일:</label>
+                <input type="email" id="signupEmail" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="signupPassword">비밀번호:</label>
+                <input type="password" id="signupPassword" name="password" required>
+            </div>
+            <div class="buttons">
+                <input type="submit" value="회원가입">
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch('/login', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(data.message);
+                // 성공 시 페이지 리디렉션
+                window.location.href = '/memos';
+            })
+            .catch(error => {
+                alert('로그인 실패: ' + error.message);
+            });
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch('/signup', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(data.message);
+                // 회원가입 성공 시 로그인 페이지로 리디렉션
+                window.location.href = '/';
+            })
+            .catch(error => {
+                alert('회원가입 실패: ' + error.message);
+            });
+        });
+    
+        function showSignupForm() {
+            // 로그인 폼 숨기기
+            document.getElementById('loginForm').style.display = 'none';
+            // 회원가입 폼 보이기
+            document.getElementById('signupForm').style.display = 'block';
+        }
+    </script>    
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>나의 메모</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
+    <style>
+        .container { 
+            margin-top: 20px; 
+            max-width: 800px;
+        }
+        
+        .card {
+            margin-bottom: 20px;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,.1);
+            background-color: #fff;
+        }
+
+        .card-body {
+            position: relative;
+            padding: 10px;
+        }
+
+        .memo-title, .memo-content {
+            width: 100%;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            padding: 10px;
+        }
+
+        .memo-title {
+            font-size: 1.1rem;
+        }
+
+        .memo-content {
+            min-height: 100px;
+        }
+
+        .edit-buttons {
+            margin: 10px;
+            text-align: right;
+            margin-right: 0px;
+            margin-bottom: 0px;
+        }
+
+        .edit-buttons .btn {
+            background-color: #f8f9fa;
+            border: none;
+            border-radius: 5px;
+            margin-left: 5px;
+            padding: 5px 10px;
+            color: #495057;
+            transition: all 0.3s ease;
+        }
+
+        .edit-buttons .btn:hover {
+            background-color: #e2e6ea;
+            transform: scale(1.1);
+        }
+
+        .edit-buttons .btn-edit {
+            background-color: #E74C3C;
+            color: #fff;
+        }
+
+        .edit-buttons .btn-edit:hover {
+            background-color: #C0392B;
+        }
+
+        .edit-buttons .btn-delete {
+            background-color: #3498DB;
+            color: #fff;
+        }
+
+        .edit-buttons .btn-delete:hover {
+            background-color: #2980B9;
+        }
+
+        .btn-primary {
+            background-color: #3F464D;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+    
+        .header-bar {
+            background-color: #FF8066; /* 변경된 헤더바 배경색 */
+            padding: 10px 0; /* 상하 패딩 */
+            text-align: center; /* 텍스트 가운데 정렬 */
+            border-radius: 10px; /* 둥근 꼭짓점 */
+            box-shadow: 0 4px 6px rgba(0,0,0,.1); /* 그림자 효과 */
+            animation: slideDown 0.5s ease-out; /* 슬라이드 다운 애니메이션 */
+            margin: 10px;
+            position: relative;
+            display: flex; /* 플렉스박스 레이아웃 적용 */
+            justify-content: center; /* 가로 중앙 정렬 */
+            align-items: center; /* 세로 중앙 정렬 */            
+        }
+        
+        .header-item {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    
+        .header-item:first-child {
+            left: 20px;
+        }
+    
+        .header-item:last-child {
+            right: 20px;
+        }
+    
+        .username-button, .logout-button {
+            display: flex;
+            align-items: center;
+        }
+    
+        .username-button i, .logout-button i {
+            margin-right: 5px;
+        }        
+    
+        .header-bar h1 {
+            color: white; /* 헤더바 텍스트 색상 */
+            margin: 0; /* 여백 제거 */
+            font-size: 1.3em; /* 폰트 크기 조정 */
+            font-weight: bold;
+            transition: all 0.3s ease-in-out; /* 부드러운 변화 효과 */
+        }
+
+        .header-content {
+            text-align: center;
+        }
+    
+        .user-info {
+            position: absolute; /* 절대 위치 지정 */
+            top: 10px;
+            right: 20px;
+            font-size: 0.9rem; /* 폰트 크기 조정 */
+        }
+    
+        .logout-button {
+            margin-left: 10px; /* 로그아웃 버튼과 사용자 ID 사이의 간격 */
+        }
+
+        .btn-sm {
+            padding: 0.15rem 0.5rem;
+            font-size: .8rem;
+            line-height: 1.5;
+            border-radius: 0.2rem;
+        }     
+    
+        /* 슬라이드 다운 애니메이션 효과 */
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }       
+    </style>
+    <script>
+        function createMemo() {
+            var title = document.getElementById('new-title').value;
+            var content = document.getElementById('new-content').value;
+
+            fetch('/memos/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title: title, content: content })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                window.location.reload(); // 페이지 새로고침
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        function toggleEdit(id) {
+            var titleEl = document.getElementById('title-' + id);
+            var contentEl = document.getElementById('content-' + id);
+            var isReadOnly = titleEl.readOnly;
+
+            titleEl.readOnly = !isReadOnly;
+            contentEl.readOnly = !isReadOnly;
+
+            if (!isReadOnly) {
+                updateMemo(id);
+            }
+        }
+
+        function updateMemo(id) {
+            var title = document.getElementById('title-' + id).value;
+            var content = document.getElementById('content-' + id).value;
+
+            fetch('/memos/update/' + id, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title: title, content: content })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                alert('메모가 업데이트되었습니다.');
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        function deleteMemo(id) {
+            if (!confirm('메모를 삭제하시겠습니까?')) return;
+
+            fetch('/memos/delete/' + id, {
+                method: 'DELETE',
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                window.location.reload(); // 페이지 새로고침
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 헤더바 추가 -->
+        <div class="header-bar">
+            <div class="header-item">
+                <a href="#" class="btn btn-sm btn-danger username-button">
+                    <i class="fas fa-user"></i> {{ username }}
+                </a>
+            </div>
+            <h1>나의 메모</h1>
+            <div class="header-item">
+                <a href="/logout" class="btn btn-sm btn-danger logout-button">
+                    <i class="fas fa-sign-out-alt"></i> 로그아웃
+                </a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <input type="text" id="new-title" placeholder="새 메모 제목" class="form-control memo-title">
+                <textarea id="new-content" placeholder="내용을 입력하세요" class="form-control memo-content"></textarea>
+                <button onclick="createMemo()" class="btn btn-primary btn-block">메모 추가</button>
+            </div>
+        </div>
+
+        {% for memo in memos %}
+        <div class="card memo">
+            <div class="card-body">               
+                <input type="text" id="title-{{ memo.id }}" value="{{ memo.title }}" class="form-control memo-title" readonly>
+                <textarea id="content-{{ memo.id }}" class="form-control memo-content" readonly>{{ memo.content }}</textarea>
+                <div class="edit-buttons">
+                    <button onclick="toggleEdit({{ memo.id }})"  class="btn btn-edit"><i class="fas fa-edit"></i></button>
+                    <button onclick="deleteMemo({{ memo.id }})" class="btn btn-delete"><i class="fas fa-trash-alt"></i></button>
+                </div>                  
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
